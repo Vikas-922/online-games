@@ -1,0 +1,209 @@
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const mongoose = require("mongoose");
+const cors = require("cors");
+
+// MongoDB Connection
+mongoose.connect('mongodb+srv://vikas123:SpGBtqkOpLf7Sb2v@cluster0.zaohd.mongodb.net/onlineGames', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('MongoDB Connected'))
+.catch(err => console.log(err));
+
+// MongoDB Schemas
+const roomSchema = new mongoose.Schema({
+  roomId: { type: String, required: true, unique: true },
+  createdAt: { type: Date, default: Date.now },
+  players: [{
+    socketID: String,
+    playerName: String,
+    symbol: String,
+    joinedAt: { type: Date, default: Date.now }
+  }],
+  gameState: {
+    board: [String],
+    currentPlayer: String,
+    winner: String,
+    lastUpdated: { type: Date, default: Date.now }
+  },
+  isActive: { type: Boolean, default: true }
+});
+
+const Room = mongoose.model('TicTacToeRoom', roomSchema);
+
+const app = express();
+app.use(cors({ origin: '*' }));
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+const rooms = {};
+
+const generateRoomId = (length = 6) => {
+  let roomId;
+  do {
+    roomId = Math.random().toString(36).substr(2, length);
+  } while (rooms[roomId]);    
+  return roomId;
+};
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("createRoom", async (_, callback) => {
+    const roomId = generateRoomId();  // You might want to change this back to generateRoomId()
+    rooms[roomId] = { players: [] };
+
+    // Create room in MongoDB
+    try {
+      const newRoom = new Room({
+        roomId,
+        gameState: {
+          board: Array(9).fill(null),
+          currentPlayer: 'X',
+          winner: null
+        }
+      });
+      await newRoom.save();
+      callback(roomId);
+    } catch (error) {
+      console.error("Error creating room:", error);
+      socket.emit("roomError", "Failed to create room");
+    }
+  });
+
+  socket.on("joinRoom", async (roomId, playerName) => {
+    try {
+      const room = rooms[roomId];
+      if (!room) {
+        socket.emit("roomError", "Room does not exist.");
+        return;
+      }
+
+      let playersInRoom = Array.from(io.sockets.adapter.rooms.get(roomId) || []);
+      if (playersInRoom.length >= 2) {
+        socket.emit("roomError", "Room is full. Unable to join.");
+        return;
+      }
+
+      socket.join(roomId);
+      const player = playersInRoom.length === 0 ? "X" : "O";
+      
+      // Update MongoDB with new player
+      const playerData = {
+        socketID: socket.id,
+        playerName: playerName,
+        symbol: player
+      };
+      
+      rooms[roomId].players.push(playerData);
+      
+      await Room.findOneAndUpdate(
+        { roomId },
+        { 
+          $push: { players: playerData }
+        },
+        { new: true }
+      );
+
+      io.to(socket.id).emit("assignPlayer", player);
+
+      const playerNames = rooms[roomId].players.map(player => player.playerName);
+      setTimeout(() => {
+        io.to(roomId).emit("playerJoined", playerNames);
+      }, 700);
+
+    } catch (error) {
+      console.error("Error joining room:", error);
+      socket.emit("roomError", "Failed to join room");
+    }
+  });
+
+  socket.on("makeMove", async ({ roomId, state }) => {
+    try {
+      rooms[roomId].state = state;
+      
+      // Update game state in MongoDB
+      await Room.findOneAndUpdate(
+        { roomId },
+        { 
+          'gameState.board': state.squares,
+          'gameState.currentPlayer': state.xIsNext ? 'O' : 'X',
+          'gameState.winner': state.winner,
+          'gameState.lastUpdated': new Date()
+        }
+      );
+
+      io.to(roomId).emit("gameStateUpdate", state, 'NA');
+    } catch (error) {
+      console.error("Error updating game state:", error);
+    }
+  });
+
+  socket.on("resetGame", async ({ roomId, state,winnerName }) => {
+    try {
+      rooms[roomId].state = state;
+      
+      // Update MongoDB with reset state
+      await Room.findOneAndUpdate(
+        { roomId },
+        { 
+          'gameState.board': Array(9).fill(null),
+          'gameState.currentPlayer': 'X',
+          'gameState.winner': winnerName,
+          'gameState.lastUpdated': new Date()
+        }
+      );
+
+      io.to(roomId).emit("gameStateUpdate", state, 'reset');
+    } catch (error) {
+      console.error("Error resetting game:", error);
+    }
+  });
+
+  socket.on("disconnect", async () => {
+    console.log("User disconnected:", socket.id);
+    const playerDetails = findPlayerBySocketId(socket.id, rooms);
+    
+    if (playerDetails) {
+      try {
+        // Update MongoDB to mark player as disconnected
+        await Room.findOneAndUpdate(
+          { roomId: playerDetails.roomId, "players.socketID": socket.id },
+          { 
+            $set: { 
+              "players.$.disconnectedAt": new Date(),
+              isActive: false
+            }
+          }
+        );
+        
+        socket.to(playerDetails.roomId).emit("playerLeft", playerDetails.playerObj.playerName);
+      } catch (error) {
+        console.error("Error handling disconnect:", error);
+      }
+    }
+  });
+});
+
+const findPlayerBySocketId = (socketId, rooms) => {
+  for (const roomId in rooms) {
+    const playerObj = rooms[roomId].players.find((ele) => ele.socketID === socketId);
+    if (playerObj) {
+      return { roomId, playerObj };
+    }
+  }
+  return null;
+};
+
+const PORT = 3000;
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});

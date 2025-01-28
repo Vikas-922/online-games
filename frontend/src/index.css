@@ -1,0 +1,202 @@
+/* @import "tailwindcss"; */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+.bgImg {
+  position: relative;
+  background: url(/bgImg.png) no-repeat center center/cover;
+}
+
+.bgImg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(125, 11, 11, 0.696); /* This adds a semi-transparent black overlay */
+  z-index: -1;
+  filter: brightness(0.1); /* Darken the image */
+}
+
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: poppins;
+}
+
+.box {
+    width: 4.2rem;  /* 16 units, equivalent to w-16 */
+    height: 4.2rem; /* 16 units, equivalent to h-16 */
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;  /* 1.25rem, equivalent to text-xl */
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.487);
+    border: 2px solid #0e0e0e;     
+  }
+
+  .btn{
+    margin: 0.5rem 0; 
+    padding: 0.3rem 1rem;   
+    border-radius: 0.5rem; 
+    text-align: center;
+    font-weight: 600; 
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  
+  .btn-a{
+    border: 2px solid #0e0e0e; 
+    background-color: rgb(189, 189, 189);
+    color: #1f2937; /* Dark gray text */
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  }
+
+  /* Hover effect */
+  .btn-a:hover {
+    background-color: #f3f4f6; /* Slight gray on hover */
+    transform: scale(1.05); /* Slightly increase size on hover */
+  }
+  
+  /* Focus effect */
+  .btn-a:focus {
+    outline: none;
+    box-shadow: 0 0 4px rgba(37, 99, 235, 0.5); /* Blue focus outline */
+  }
+  
+  /* Disabled button */
+  .btn-a:disabled {
+    background-color: #e5e7eb; /* Light gray */
+    cursor: not-allowed;
+  }
+
+  
+
+  .btn2 {          
+    color: white; 
+    background-color: #3b82f6; 
+    transition: background-color 0.2s ease-in-out; 
+  }
+  
+  /* Hover effect */
+  .btn2:hover {
+    background-color: #2563eb; /* Darker blue on hover */
+    transform: scale(1.05);
+  }
+  
+  /* Disabled state */
+  .btn2:disabled {
+    background-color: #9ca3af; /* Gray background for disabled buttons */
+    cursor: not-allowed; /* Not-allowed cursor */
+  }
+
+
+  .btn-green {
+    background-color: #22c55e;
+    color: white;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .btn-green:hover {
+    background-color: #16a34a;
+    transform: scale(1.05);
+  }
+  
+  .btn-green:disabled{
+    background-color: gray;
+    cursor: not-allowed;
+  }
+  
+  
+
+  .status-message {
+    font-size: 1.1rem; /* Text size */
+    font-weight: 600;
+    color: #dceaff; 
+  }
+
+  .grid-layout {
+    display: grid; /* Enable grid layout */
+    grid-template-columns: repeat(3, 1fr); /* Create 3 equal-width columns */
+    gap: 0.25rem; 
+    margin: 1rem 0;
+  }
+
+
+
+  .flex-col-center {
+    display: flex; 
+    flex-direction: column;
+    align-items: center; 
+    justify-content: center;     
+  }
+
+  .container1 {
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    min-height: 100vh; 
+    background-color: #f3f4f6; 
+  }
+
+  .join-room-container{
+    border: 2px solid rgb(247, 50, 86);
+    border-radius: 0.5rem;
+    padding: 1rem;
+  }
+
+
+  .heading {
+    font-size: 1.7rem; /* Equivalent to text-2xl (24px) */
+    font-weight: 700; /* Bold text */
+    margin-bottom: 1.5rem; 
+    background: linear-gradient(to right, #ff2125, #33FF57, #3357FF);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+  }
+  
+  .input {
+    margin-bottom: 1rem;
+    padding: 0.3rem 1rem;
+    outline: 2px solid black;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .input:focus{
+    outline: 2px solid rgb(64, 213, 254);
+  }
+  .input:disabled{
+    outline: 2px solid rgb(138, 138, 138);
+  }
+
+  .border-blue{
+    border: 3px solid #3b82f6;
+  }
+  
+  .mb-4 {
+    margin-bottom: 0.7rem;
+  }
+  
+
+  .room-status{
+    background-color: #49ff95;
+    padding:3px 1rem ;
+    border-radius: 0.5rem;
+    margin: 0.5rem 0;
+  }
+
+
+
+
+
+
+
+
+
