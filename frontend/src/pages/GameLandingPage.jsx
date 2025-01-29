@@ -1,6 +1,6 @@
 import React, { useState,useRef, useEffect } from "react";
 import toast from "react-hot-toast";
-
+import { roomHandlers } from "../utility/socketUtils";
 
 
 const GameLandingPage = ({ onRoomCreated, onRoomJoined,socket }) => {
@@ -18,6 +18,7 @@ const GameLandingPage = ({ onRoomCreated, onRoomJoined,socket }) => {
         setRoomId(newRoomId);
         toast.success(`Room created successfully!`);
         onRoomCreated(newRoomId);
+        roomHandlers.copyRoomId(newRoomId);
         // console.log("New Room ID:", newRoomId);
       });
     };
