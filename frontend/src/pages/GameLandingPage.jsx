@@ -2,6 +2,7 @@ import React, { useState,useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 
 
+
 const GameLandingPage = ({ onRoomCreated, onRoomJoined,socket }) => {
     const [name, setName] = useState("");
     const [roomId, setRoomId] = useState("");
@@ -10,6 +11,9 @@ const GameLandingPage = ({ onRoomCreated, onRoomJoined,socket }) => {
     const createRoom = () => {
       // console.log("Creating room...");
       socket.emit("createRoom", null, (newRoomId) => {
+        if (newRoomId==='error') {
+          toast.error("Failed to create room.", { icon: "⚠️" });
+        }
         setCreatedRoomId(newRoomId);
         setRoomId(newRoomId);
         toast.success(`Room created successfully!`);
@@ -23,14 +27,29 @@ const GameLandingPage = ({ onRoomCreated, onRoomJoined,socket }) => {
         // console.log("Joining room...", roomId);
         socket.emit("joinRoom", roomId, name, (error) => {
           if (error) {
-            alert(`Error joining room: ${error}`);
-            return;
+            switch (error.code) {
+                case "ROOM_NOT_FOUND":
+                    toast.error("Room not found! Please check the ID.", { icon: "❌" });
+                    break;
+                case "ROOM_FULL":
+                    toast.error("Room is full! Try another one.", { icon: "🚫" });
+                    break;
+                case "SERVER_ERROR":
+                    toast.error("Something went wrong! Try again later.", { icon: "⚠️" });
+                    break;
+                default:
+                    toast.error("Unknown error occurred!", { icon: "❓" });
+            }
+            return ;
+          } else {
+            toast.success("Successfully joined the room!");
+            // onRoomJoined(roomId,name, "O");
+            onRoomJoined(roomId,name, "O");
           }
         });      
-        // onRoomJoined(roomId,name, "O");
-        onRoomJoined(roomId,name, "O");
+        
       } else {
-        alert("Please enter a valid Room ID.");
+        toast.error("Please enter a valid Room ID.", { icon: "⚠️" });
       }
     };
   

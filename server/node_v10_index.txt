@@ -71,12 +71,11 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("joinRoom", async (roomId, playerName) => {
+  socket.on("joinRoom", async (roomId, playerName, callback) => {
     try {
       const room = rooms[roomId];
       if (!room) {
-        return callback({ code: "ROOM_NOT_FOUND", message: "Room does not exist." });
-        // socket.emit("roomError", "Room does not exist.");
+         return callback({ code: "ROOM_NOT_FOUND", message: "Room does not exist." });
       }
 
       let playersInRoom = Array.from(io.sockets.adapter.rooms.get(roomId) || []);
@@ -116,7 +115,7 @@ io.on("connection", (socket) => {
         io.to(roomId).emit("playerJoined", playerNames);
         // io.to(roomId).emit("playerJoined", rooms[roomId].players);
       }, 700);
-
+      
       callback(); // No error, join successful
     } catch (error) {
       console.error("Error joining room:", error);
@@ -148,8 +147,7 @@ io.on("connection", (socket) => {
 
         // Fetch updated scores to broadcast to players
         const updatedRoom = await Room.findOne({ roomId });
-        const scores = Object.fromEntries(updatedRoom.scores);
-        // const scores = mapToObject(updatedRoom.scores);
+        const scores = mapToObject(updatedRoom.scores);
         console.log('scores',scores);
         
         io.to(roomId).emit("scoresUpdate", scores);
@@ -210,6 +208,16 @@ io.on("connection", (socket) => {
 
 
 
+// Add this helper function
+const mapToObject = (map) => {
+    const obj = {};
+    map.forEach((value, key) => {
+        obj[key] = value;
+    });
+    return obj;
+};
+
+
 const findPlayerBySocketId = (socketId,rooms) => {
   for (const roomId in rooms) {
     console.log('======== ',roomId,rooms);
@@ -224,14 +232,7 @@ const findPlayerBySocketId = (socketId,rooms) => {
 };
 
 
-//  helper  // for node v10 
-const mapToObject = (map) => {
-  const obj = {};
-  map.forEach((value, key) => {
-      obj[key] = value;
-  });
-  return obj;
-};
+
 
 
 const PORT = process.env.PORT;

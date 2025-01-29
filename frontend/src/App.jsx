@@ -3,8 +3,6 @@ import io from "socket.io-client";
 import toast, { Toaster } from "react-hot-toast";
 import Board from "./components/Board";
 import GameLandingPage from "./pages/GameLandingPage";
-// import dotenv from 'dotenv';
-// dotenv.config();
 
 const SERVER_URI = import.meta.env.VITE_SERVER_URI;
 
@@ -17,9 +15,23 @@ const App = () => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    socket.on('connect', () => {
+      setIsConnected(false);
+      toast.success('Connected to game server', {
+        icon: '🎮'
+      });
+    });
+
     socket.on("assignPlayer", (assignedPlayer) => {
       setPlayer(assignedPlayer);
       // console.log('player assigned');
+    });
+
+    socket.on('disconnect', () => {
+      setIsConnected(false);
+      toast.error('Lost connection to game server', {
+        icon: '❌'
+      });
     });
 
     return () => {
@@ -50,7 +62,7 @@ const App = () => {
         <Board roomId={roomId} player={player} playerName={name} socket={socket}  />
       )}
 
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster position="top-center" reverseOrder={true} />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import Square from "./Square";
 const Board = ({roomId,playerName, player,socket}) => {
   // playerName a player X opponetPlayerName s
     const winnerAnnounced = useRef(false);
+    const [isDisabled, setIsDisabled] = useState(false);
     const playerRef = useRef(player);
     const [squares, setSquares] = useState(Array(9).fill(null));
     const [isYourTurn, setIsYourTurn] = useState(true);
@@ -29,7 +30,13 @@ const Board = ({roomId,playerName, player,socket}) => {
         if( state.turnOff===playerRef.current || state.turnOff==='both'  )  setIsYourTurn(true);        
         // console.log('MSG MSG MSG',msg);
         
-        if (msg==='reset') winnerAnnounced.current = false; // Reset the ref
+        if (msg==='reset'){
+          winnerAnnounced.current = false;
+          toast(`Game Reset!!`, {
+            icon: '🔁',
+            }); 
+
+        }  // Reset the ref
         // console.log('from server', 'player', playerRef.current,'turnOff',state.turnOff, state.squares );
       });
       // console.log('use effect in board');
@@ -151,6 +158,7 @@ const Board = ({roomId,playerName, player,socket}) => {
 
     
     const handleReset = () => {
+      setIsDisabled(true);
       const resetState = {
         squares: Array(9).fill(null),
         turnOff: 'both',
@@ -162,6 +170,10 @@ const Board = ({roomId,playerName, player,socket}) => {
          winnerName = (player === winner ) ? playerName : opponetPlayerName;
       }
       socket.emit("resetGame", { roomId, state: resetState, winnerName });
+      // Re-enable the button after 3 seconds
+        setTimeout(() => {
+          setIsDisabled(false);
+        }, 3000);
     };
 
     return (
@@ -179,6 +191,7 @@ const Board = ({roomId,playerName, player,socket}) => {
           <button
             className="btn btn2"
             onClick={() => {  handleReset()  }}
+            disabled={isDisabled}
           >
             Restart Game
           </button>
