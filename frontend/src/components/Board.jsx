@@ -3,6 +3,13 @@ import toast from "react-hot-toast";
 import Square from "./Square";
 
 
+const stylee = {
+    marginTop: "45vh",
+    textAlign: "center",
+    fontSize: "16px",
+    fontWeight: "bold",
+    padding: "1rem",
+};
 
 const Board = ({roomId,playerName, player,socket}) => {
   // playerName a player X opponetPlayerName s
@@ -87,19 +94,26 @@ const Board = ({roomId,playerName, player,socket}) => {
       if (winner && !winnerAnnounced.current) {
         toast[winner === player ? 'success' : 'error'](`YOU, ${ winner===player ? 'WON': 'LOSE'}`, {
           position: "top-center",
-          duration: 1200, 
+          duration: 1400, 
           style: {
-            marginTop: "45vh",
-            textAlign: "center",
-            fontSize: "16px",
-            fontWeight: "bold",
-            padding: "1rem",
+            ...stylee,
             color: winner===player ? 'green': 'red',
           },
         });
         winnerAnnounced.current = true; // Mark as announced
+      }else if (!winner && squares.every(square => square !== null) && !winnerAnnounced.current) {
+        toast("It's a Tie!", {
+          icon: '⚖️',
+          position: "top-center",
+          duration: 1800, 
+          style: {
+            ...stylee,
+            color: '#ff9d00',
+          },
+        });
+        winnerAnnounced.current = true;
       }
-    }, [winner]);
+    }, [winner, squares]);
   
 
     const handleClick = (index) => {
@@ -187,7 +201,7 @@ const Board = ({roomId,playerName, player,socket}) => {
             <Square key={index} value={square} onClick={() => handleClick(index)} />
           ))}
         </div>
-        {winner && (
+        {( winner || squares.every(square => square !== null) ) && (
           <button
             className="btn btn2"
             onClick={() => {  handleReset()  }}

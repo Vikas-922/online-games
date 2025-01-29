@@ -71,7 +71,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("joinRoom", async (roomId, playerName) => {
+  socket.on("joinRoom", async (roomId, playerName,callback) => {
     try {
       const room = rooms[roomId];
       if (!room) {
