@@ -167,6 +167,7 @@
     outline: 2px solid black;
     border-radius: 0.5rem;
     font-size: 1rem;
+    max-width: 16rem;
   }
 
   .input:focus{
