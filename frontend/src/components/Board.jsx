@@ -48,8 +48,8 @@ const Board = ({roomId,playerName, player,socket}) => {
           const oppPly = Name.find((plyrName) => plyrName !== playerName) || '';
           setopponetPlayerName(oppPly);
           if (oppPly!=='') {
-            toast(`${oppPly} joined`, {
-                icon: '👏',
+            toast(`${oppPly}, joined.`, {
+                icon: '🧑',
             });
           }
           // console.log('Player:', playerName, 'Players in room:', Name, 'Opponent:', oppPly);
