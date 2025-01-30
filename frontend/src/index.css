@@ -283,6 +283,11 @@
   transform: scale(1.1);
 }
 
+.feedback-toggle-btn.disabled{
+  background-color: gray;
+  cursor: not-allowed;
+}
+
 
 
 

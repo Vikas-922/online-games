@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { roomHandlers } from "../utility/socketUtils";
 
 
-const GameLandingPage = ({ onRoomCreated, onRoomJoined,socket }) => {
+const GameLandingPage = ({ onRoomCreated, onRoomJoined,socket,setGlobalName }) => {
     const [name, setName] = useState("");
     const [roomId, setRoomId] = useState("");
     const [createdRoomId, setCreatedRoomId] = useState(null);
@@ -62,7 +62,10 @@ const GameLandingPage = ({ onRoomCreated, onRoomJoined,socket }) => {
           type="text"
           placeholder="Enter Your Name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            setGlobalName(e.target.value);
+          }}
           className="input"          
         />
   

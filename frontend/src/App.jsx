@@ -87,6 +87,16 @@ const App = () => {
   }, [isFeedbackExpanded]);
 
 
+  const onFeedbackClick = ()=>{
+    console.log(name);          
+    if (name.trim()) {
+      setFeedbackExpanded(true);
+    } else {
+      toast.error("Enter name first!", {
+        icon: "✏️",
+      });
+    }
+  }
 
   return (
     <div className="container1 bgImg">
@@ -94,6 +104,7 @@ const App = () => {
         <GameLandingPage
           onRoomCreated={handleRoomCreated}
           onRoomJoined={handleRoomJoined}
+          setGlobalName={setName}
           socket={socket}
         />
       ) : (
@@ -128,8 +139,8 @@ const App = () => {
       </div>
       ) : (
       <button
-        onClick={() => setFeedbackExpanded(true)}
-        className="feedback-toggle-btn"
+        onClick={() => onFeedbackClick()}
+        className={`feedback-toggle-btn ${!name.trim() ? 'disabled' : '' }`}
       >
         <FaCommentDots size={20} />
       </button>
