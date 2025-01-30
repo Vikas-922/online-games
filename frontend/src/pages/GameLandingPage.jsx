@@ -54,7 +54,7 @@ const GameLandingPage = ({ onRoomCreated, onRoomJoined,socket,setGlobalName }) =
       }
     };
   
-
+     
     return (
       <>
         <h1 className="heading">Tic Tac Toe</h1>  
