@@ -139,8 +139,8 @@ const Board = ({roomId,playerName, player,socket}) => {
       }
     };
   
-    const XX = <span style={{ color: "#7cff17", fontSize:'1.1rem' }}>you</span>
-    const OO = <span style={{ color: "#ff5d17", fontSize:'1.1rem' }}>opponent</span>
+    const XX = <span className="txt2" style={{ color: "#7cff17" }}>you</span>
+    const OO = <span className="txt2" style={{ color: "#ff5d17"}}>opponent</span>
     const winnerComp = (
       <span>
         {winner ? (
@@ -195,7 +195,7 @@ const Board = ({roomId,playerName, player,socket}) => {
         <h1 className="heading">Tic Tac Toe</h1>
         <div className="status-message">{scoresComp}</div>
         <div className="status-message mb-4">Opponent : <span style={{ fontSize:'1.2rem', color: "#ff705d", fontWeight: '600' }}> {opponetPlayerName ? opponetPlayerName : 'Not Joined'} </span> </div>
-        <div style={{ fontSize: '1.3rem' }} className="status-message">{winnerComp}</div>
+        <div className="status-message txt3">{winnerComp}</div>
         <div className="grid-layout">
           {squares.map((square, index) => (
             <Square key={index} value={square} onClick={() => handleClick(index)} />

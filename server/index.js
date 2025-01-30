@@ -150,7 +150,7 @@ io.on("connection", (socket) => {
         const updatedRoom = await Room.findOne({ roomId });
         const scores = Object.fromEntries(updatedRoom.scores);
         // const scores = mapToObject(updatedRoom.scores);
-        console.log('scores',scores);
+        // console.log('scores',scores);
         
         io.to(roomId).emit("scoresUpdate", scores);
       }
@@ -186,7 +186,7 @@ io.on("connection", (socket) => {
           if (rooms[playerDetails.roomId].players.length === 0) {
             delete rooms[playerDetails.roomId];
           }
-          console.log('isActive: false');
+          // console.log('isActive: false');
           
           await Room.findOneAndUpdate(
             { roomId: playerDetails.roomId },
@@ -212,10 +212,10 @@ io.on("connection", (socket) => {
 
 const findPlayerBySocketId = (socketId,rooms) => {
   for (const roomId in rooms) {
-    console.log('======== ',roomId,rooms);
+    // console.log('======== ',roomId,rooms);
     
     const playerObj = rooms[roomId].players.find((ele) => ele.socketID === socketId);
-    console.log('playerObj',playerObj)
+    // console.log('playerObj',playerObj)
     if (playerObj) {
       return { roomId, playerObj }; // Return both the roomId and the player
     }
