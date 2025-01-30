@@ -1,167 +1,182 @@
 import React, { useState,useRef, useEffect } from "react";
 import io from "socket.io-client";
 import toast, { Toaster } from "react-hot-toast";
-import Square from "./Square";
+import Board from "./components/Board";
+import GameLandingPage from "./pages/GameLandingPage";
+import { FaCommentDots, FaPaperPlane } from "react-icons/fa"; // Icons from react-icons
 
 
+const SERVER_URI = import.meta.env.VITE_SERVER_URI;
 
-const Board = ({roomId,playerName, player,socket}) => {
-  // playerName a player X opponetPlayerName s
-    const winnerAnnounced = useRef(false);
-    const [squares, setSquares] = useState(Array(9).fill(null));
-    const [isXNext, setIsXNext] = useState(true);
-    const [opponetPlayerName, setopponetPlayerName] = useState('');
+const socket = io(SERVER_URI);
 
-    console.log('playerName',playerName,'player',player,'opponetPlayerName',opponetPlayerName);
-    
-  
-    useEffect(() => {
-      socket.on("gameStateUpdate", (state, msg) => {
-        // setGameState(state);
-        setSquares(state.squares);
-        setIsXNext(state.isXNext);
-        console.log('MSG MSG MSG',msg);
-        
-        if (msg==='reset') winnerAnnounced.current = false; // Reset the ref
-        console.log('from server', state.squares, 'isXNext', state.isXNext );
+const App = () => {
+  const [name, setName] = useState("");
+  const [roomId, setRoomId] = useState("");
+  const [player, setPlayer] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isFeedbackExpanded, setFeedbackExpanded] = useState(false);
+  const [feedbackText, setFeedbackText] = useState("");
+  const feedbackRef = useRef(null); // Ref for the feedback section
+
+
+  useEffect(() => {
+    socket.on('connect', () => {
+      setIsConnected(false);
+      toast.success('Connected to game server', {
+        icon: '🎮'
       });
-      console.log('use effect in board');
-      
-      socket.on('playerJoined', (Name) => {
-        console.log('inside player joined');
-        
-        if (Array.isArray(Name)) { // Ensure Name is an array
-          const oppPly = Name.find((plyrName) => plyrName !== playerName) || '';
-          setopponetPlayerName(oppPly);
-          console.log('Player:', playerName, 'Players in room:', Name, 'Opponent:', oppPly);
-        } else {
-          console.error('Invalid data received:', Name);
-        }
+    });
+
+    socket.on("assignPlayer", (assignedPlayer) => {
+      setPlayer(assignedPlayer);
+      // console.log('player assigned');
+    });
+
+    socket.on('disconnect', () => {
+      setIsConnected(false);
+      toast.error('Lost connection to game server', {
+        icon: '❌'
       });
-  
-      return () => {
-        socket.off("gameStateUpdate");
-        socket.off("playerJoined");
-      };
-    }, []);
-  
-    const handleClick = (index) => {
-      if (squares[index] || calculateWinner(squares)) return;
-      console.log(player, isXNext);
-      
-      if ((player === "X" && isXNext) || (player === "O" && !isXNext)) {
-        const nextSquares = [...squares];
-        nextSquares[index] = isXNext ? "X" : "O";
-  
-        const nextState = {
-          squares: nextSquares,
-          isXNext: !isXNext,
-        };
-  
-        setSquares(nextState.squares);
-        setIsXNext(nextState.isXNext);     
-        console.log('to server', nextState.squares);      
-        console.log('to server ===> ','player', player, ' isXNext',nextState.isXNext );
-        socket.emit("makeMove", { roomId, state: nextState });
+    });
+
+
+    const handleClickOutside = (event) => {
+      if (feedbackRef.current && !feedbackRef.current.contains(event.target)) {
+        setFeedbackExpanded(false); // Collapse the feedback section
       }
     };
+
+    const istTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+    console.log(istTime);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      socket.off("assignPlayer");
+      // Clean up the event listener
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+
   
-    const winner = calculateWinner(squares);
-    const XX = <span style={{ color: "#175dff" }}>X</span>
-    const OO = <span style={{ color: "green" }}>O</span>
-    const winnerComp = (
-      <span>
-        {winner ? (
-          <span style={{ color: "#ffd817" }}>
-            Winner:{" "}
-            {winner === "X" ? XX : OO}
-          </span>
-        ) : (
-          <span style={{ color: "#e89714" }}>
-            Turn:{" "}
-            {isXNext ? XX : OO}
-          </span>
-        )}
-      </span>
-    );
-  
-    // Show the winner toast once
-    useEffect(() => {
-      if (winner && !winnerAnnounced.current) {
-       
-        toast[winner === player ? 'success' : 'error'](`YOU, ${ winner===player ? 'WON': 'LOSE'}`, {
-          position: "top-center",
-          duration: 1200, 
-          style: {
-            marginTop: "45vh",
-            textAlign: "center",
-            fontSize: "16px",
-            fontWeight: "bold",
-            padding: "1rem",
-            color: winner===player ? 'green': 'red',
-          },
-        });
-        winnerAnnounced.current = true; // Mark as announced
-      }
-    }, [winner]);
-    
-    // const status = winner ? `Winner: ${winner}` : `Next player: ${isXNext ? "X" : "O"}`;
-  
-    return (
-      <div>      
-        <h1 className="heading">Tic Tac Toe</h1>
-        <div className="status-message mb-4">Opponent : <span style={{ fontSize:'1.2rem', color: "#ff705d", fontWeight: '600' }}> {opponetPlayerName ? opponetPlayerName : 'Not Joined'} </span> </div>
-        <div style={{ fontSize: '1.3rem' }} className="status-message">{winnerComp}</div>
-        <div className="grid-layout">
-          {squares.map((square, index) => (
-            <Square key={index} value={square} onClick={() => handleClick(index)} />
-          ))}
-        </div>
-        {winner && (
-          <button
-            className="btn2"
-            onClick={() => {
-              const resetState = {
-                squares: Array(9).fill(null),
-                isXNext: true,
-              };
-              winnerAnnounced.current = false; // Reset the ref
-              socket.emit("resetGame", { roomId, state: resetState });
-            }}
-          >
-            Restart Game
-          </button>
-        )}
-      </div>
-    );
+  const handleRoomCreated = (newRoomId) => {
+    setRoomId(newRoomId);
   };
-  
-  
-  
-  const calculateWinner = (squares) => {
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-  
-    for (let line of lines) {
-      const [a, b, c] = line;
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {      
-        console.log('winner ', squares[a]);
-        return squares[a];      
-      }
+
+
+  const handleRoomJoined = (existingRoomId, playerName, assignedPlayer) => {
+    setRoomId(existingRoomId);
+    setName(playerName)
+    // setPlayer(assignedPlayer);
+    setIsConnected(true);
+  };
+
+
+  // const handleFeedbackSubmit = () => {
+  //   if (feedbackText.trim()) {
+  //     console.log("Feedback submitted:", feedbackText);
+
+  //     setFeedbackText(""); 
+  //     setFeedbackExpanded(false); // Collapse the feedback section
+  //   }
+  // };
+
+  const handleFeedbackSubmit = async () => {
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: userName,
+          feedback: feedbackText
+        })
+      });
+
+      if (!response.ok) throw new Error('Submission failed');
+      
+      setFeedbackText('');
+      setFeedbackExpanded(false);
+      toast.success('Feedback submitted!');
+    } catch (error) {
+      toast.error('Failed to submit feedback');
+      console.error('Submission error:', error);
     }
-    return null;
   };
-  
 
 
+  // Ensure the textbox is visible when the keyboard appears
+  useEffect(() => {
+    if (isFeedbackExpanded && feedbackRef.current) {
+      feedbackRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [isFeedbackExpanded]);
 
 
-  export default Board;
+  const onFeedbackClick = ()=>{
+    console.log(name);          
+    if (name.trim()) {
+      setFeedbackExpanded(true);
+    } else {
+      toast.error("Enter name first!", {
+        icon: "✏️",
+      });
+    }
+  }
+
+  return (
+    <div className="container1 bgImg">
+      {!isConnected ? (
+        <GameLandingPage
+          onRoomCreated={handleRoomCreated}
+          onRoomJoined={handleRoomJoined}
+          setGlobalName={setName}
+          socket={socket}
+        />
+      ) : (
+        <Board roomId={roomId} player={player} playerName={name} socket={socket}  />
+      )}
+      {/* Feedback Button and Textbox */}
+      <div
+        ref={feedbackRef}
+        style={{
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          zIndex: 1000, // Ensure it's above other elements
+        }}
+      >
+      
+      {isFeedbackExpanded ? (
+      <div className="feedback-box show">
+        <input
+          type="text"
+          placeholder="Your feedback..."
+          value={feedbackText}
+          onChange={(e) => setFeedbackText(e.target.value)}
+          className="feedback-input"
+        />
+        <button onClick={handleFeedbackSubmit} className="feedback-send-btn">
+          <FaPaperPlane /> Send
+        </button>
+      </div>
+      ) : (
+      <button
+        onClick={() => onFeedbackClick()}
+        className={`feedback-toggle-btn ${!name.trim() ? 'disabled' : '' }`}
+      >
+        <FaCommentDots size={20} />
+      </button>
+    )}
+    </div>
+
+      <Toaster position="top-center" reverseOrder={true} />
+    </div>
+  );
+};
+
+
+export default App;

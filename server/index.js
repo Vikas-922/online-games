@@ -4,6 +4,7 @@ const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require('dotenv').config();
+const moment = require('moment-timezone');
 
 const mongoURI = process.env.MONGO_URI;
 
@@ -29,7 +30,28 @@ const roomSchema = new mongoose.Schema({
 
 const Room = mongoose.model('TicTacToeRoom', roomSchema);
 
+// Feedback Schema
+const feedbackSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  feedback: { type: String, required: true },
+  formattedTimestamp: {
+    type: String,
+    default: () => moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm:ss A') // ✅ Readable format
+  },
+  timestamp: {
+    type: Date,
+    default: () =>moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A')
+  }
+});
+const Feedback = mongoose.model('Feedback', feedbackSchema);
+
+
+
+
+
 const app = express();
+app.use(express.json());
+
 app.use(cors({ origin: '*' }));
 
 const server = http.createServer(app);
@@ -42,13 +64,6 @@ const io = new Server(server, {
 
 const rooms = {};
 
-const generateRoomId = (length = 6) => {
-  let roomId;
-  do {
-    roomId = Math.random().toString(36).substr(2, length);
-  } while (rooms[roomId]);    
-  return roomId;
-};
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
@@ -208,6 +223,36 @@ io.on("connection", (socket) => {
   });
 });
 
+
+// Feedback Endpoint (Node 10 compatible)
+app.post('/api/feedback', function(req, res) {
+  const { name, feedback } = req.body;
+  console.log('timeStamp',moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm:ss A'));
+  
+
+  const newFeedback = new Feedback({
+    name: name || 'Anonymous',
+    feedback
+  });
+
+  newFeedback.save()
+    .then(function() {
+      res.status(201).json({ success: true });
+    })
+    .catch(function(err) {
+      console.error('Save error:', err);
+      res.status(500).json({ error: 'Server error' });
+    });
+});
+
+
+const generateRoomId = (length = 6) => {
+  let roomId;
+  do {
+    roomId = Math.random().toString(36).substr(2, length);
+  } while (rooms[roomId]);    
+  return roomId;
+};
 
 
 const findPlayerBySocketId = (socketId,rooms) => {
