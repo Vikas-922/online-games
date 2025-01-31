@@ -117,8 +117,8 @@ const handleDisconnect = async (io, socket) => {
       rooms[playerDetails.roomId].players = rooms[playerDetails.roomId].players.filter(
         player => player.socketID !== socket.id
       );
-
-      if (playersInRoom.length <= 1) {
+      
+      if (playersInRoom.length < 1) {
         // If no players left, remove the room
         if (rooms[playerDetails.roomId].players.length === 0) {
           delete rooms[playerDetails.roomId];
@@ -127,7 +127,7 @@ const handleDisconnect = async (io, socket) => {
         await Room.findOneAndUpdate(
           { roomId: playerDetails.roomId },
           { isActive: false }
-        );
+        );        
       }
 
         // Remove player from players array
@@ -141,7 +141,7 @@ const handleDisconnect = async (io, socket) => {
       console.error("Error handling disconnect:", error);
     }
   }
-  
+
   console.log("User disconnected:", socket.id);
 };
 
