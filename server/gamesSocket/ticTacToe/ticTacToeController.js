@@ -109,8 +109,9 @@ const handleDisconnect = async (io, socket) => {
   const playerDetails = findPlayerBySocketId(socket.id, rooms);
   if (playerDetails) {
     try {
-      const playersInRoom = io.sockets.adapter.rooms.get(playerDetails.roomId) 
-        ? Array.from(io.sockets.adapter.rooms.get(playerDetails.roomId))
+      // const playersInRoom = io.sockets.adapter.rooms.get(playerDetails.roomId) /// if not using namespace for io
+      const playersInRoom = io.adapter.rooms.get(playerDetails.roomId) /// if using namespace for io
+        ? Array.from(io.adapter.rooms.get(playerDetails.roomId))
         : [];
       
       rooms[playerDetails.roomId].players = rooms[playerDetails.roomId].players.filter(
@@ -134,12 +135,14 @@ const handleDisconnect = async (io, socket) => {
         //   { roomId: playerDetails.roomId },
         //   { $pull: { players: playerDetails.playerObj.playerName } }
         // );
-
+      
       socket.to(playerDetails.roomId).emit("playerLeft", playerDetails.playerObj.playerName);
     } catch (error) {
       console.error("Error handling disconnect:", error);
     }
   }
+  
+  console.log("User disconnected:", socket.id);
 };
 
 module.exports = { createRoom, joinRoom, makeMove, resetGame, handleDisconnect };

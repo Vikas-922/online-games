@@ -19,16 +19,18 @@ const io = new Server(server, {
   },
 });
 
+// Create a namespace for Tic-Tac-Toe
+const ticTacToeNamespace = io.of("/tic-tac-toe");
 
-io.on("connection", (socket) => {
+ticTacToeNamespace.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
   // Game events
   socket.on("createRoom", (data, callback) => createRoom(data, callback));
-  socket.on("joinRoom", (roomId, playerName, callback) => joinRoom(io, socket, roomId, playerName, callback));
-  socket.on("makeMove", (data) => makeMove(io, data.roomId, data.state));
-  socket.on("resetGame", (data) => resetGame(io, data.roomId, data.state, data.winnerName));
-  socket.on("disconnect", () => handleDisconnect(io, socket));
+  socket.on("joinRoom", (roomId, playerName, callback) => joinRoom(ticTacToeNamespace, socket, roomId, playerName, callback));
+  socket.on("makeMove", (data) => makeMove(ticTacToeNamespace, data.roomId, data.state));
+  socket.on("resetGame", (data) => resetGame(ticTacToeNamespace, data.roomId, data.state, data.winnerName));
+  socket.on("disconnect", () => handleDisconnect(ticTacToeNamespace, socket));
 });
 
 

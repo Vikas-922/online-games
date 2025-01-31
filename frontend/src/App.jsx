@@ -8,7 +8,7 @@ import Feedback from "./components/Feedback";
 
 const SERVER_URI = import.meta.env.VITE_SERVER_URI;
 
-const socket = io(SERVER_URI);
+const socket = io(`${SERVER_URI}/tic-tac-toe`);
 
 const App = () => {
   const [name, setName] = useState("");
@@ -37,12 +37,20 @@ const App = () => {
       });
     });
 
+    // Handle page refresh (force disconnect)
+    const handleUnload = () => {
+      socket.disconnect();
+    };
 
+    // window.addEventListener("beforeunload", handleUnload);
     
     return () => {
       socket.off("assignPlayer");
+      socket.off("connect");
+      socket.off("disconnect");
       // Clean up the event listener
       document.removeEventListener("mousedown", handleClickOutside);
+      // window.removeEventListener("beforeunload", handleUnload);
     };
   }, []);
 
@@ -59,10 +67,6 @@ const App = () => {
     // setPlayer(assignedPlayer);
     setIsConnected(true);
   };
-
-
-
-  
 
 
   

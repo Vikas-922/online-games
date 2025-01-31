@@ -57,6 +57,10 @@ const Board = ({roomId,playerName, player,socket}) => {
           if (oppPly!=='') {
             toast(`${oppPly}, joined.`, {
                 icon: '🧑',
+                style: {
+                  background: '#4CAF50',
+                  color: 'white',
+                },
             });
           }
           // console.log('Player:', playerName, 'Players in room:', Name, 'Opponent:', oppPly);
@@ -66,8 +70,12 @@ const Board = ({roomId,playerName, player,socket}) => {
       });
 
       socket.on('playerLeft', (plyerLeftName) => {
-        toast(`${plyerLeftName} Left`, {
-          icon: '🛑',
+        toast(`${plyerLeftName}, Left!`, {
+          icon: '🧑',
+          style: {
+            background: '#ff7157',
+            color: 'white',
+          },
           }); 
           // console.log('opponetPlayerName , plyerLeftName',opponetPlayerName,plyerLeftName,true);          
           setopponetPlayerName(opponetPlayerName => 
