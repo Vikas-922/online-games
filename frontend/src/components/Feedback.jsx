@@ -20,7 +20,7 @@ const Feedback = ({name}) => {
           };
       
           const istTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
-          console.log(istTime);
+          // console.log(istTime);
       
           document.addEventListener("mousedown", handleClickOutside);
 
@@ -42,7 +42,7 @@ const Feedback = ({name}) => {
 
     const handleFeedbackSubmit = async () => {
         
-      console.log("Feedback submitted:",name, feedbackText);
+      // console.log("Feedback submitted:",name, feedbackText);
         if (!feedbackText.trim()) {
             toast.error("Feedback cannot be empty!", {
                 icon: "⚠️",
@@ -82,7 +82,7 @@ const Feedback = ({name}) => {
 
 
   const onFeedbackClick = ()=>{
-    console.log(name);          
+    // console.log(name);          
     if (name.trim()) {
       setFeedbackExpanded(true);
     } else {
