@@ -1,13 +1,13 @@
 ﻿# online-games
 
 
- # 🎮 Online Multiplayer Tic Tac Toe
+## 🎮 Online Multiplayer Tic Tac Toe
 
 A real-time online **Tic Tac Toe** game where you can create or join rooms to play with friends. Each room supports **up to 2 players**.
 
 ---
 
-## 🚀 Features
+### 🚀 Features
 
 - Create or join a game room using Room ID
 - Real-time game updates using **Socket.IO**
@@ -16,7 +16,7 @@ A real-time online **Tic Tac Toe** game where you can create or join rooms to pl
 
 ---
 
-## 🧑‍💻 Tech Stack
+### 🧑‍💻 Tech Stack
 
 - **React** – Frontend
 - **Node.js + Express** – Backend
@@ -25,7 +25,7 @@ A real-time online **Tic Tac Toe** game where you can create or join rooms to pl
 
 ---
 
-## ▶️ How to Use
+### ▶️ How to Use
 
 1. Create a room and share the Room ID.
 2. Friend joins the room using the ID.
